@@ -1,0 +1,1279 @@
+{
+  "id": "8d804735-c07b-4d52-92fb-5df207cae505",
+  "revision": 0,
+  "last_node_id": 23,
+  "last_link_id": 26,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        40,
+        360
+      ],
+      "size": [
+        280,
+        320
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2,
+            3
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example_image.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "LoadSAM3Model",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "sam3_model",
+          "type": "SAM3_MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-sam3",
+        "Node name for S&R": "LoadSAM3Model"
+      },
+      "widgets_values": [
+        "models/sam3/sam3.pt"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SAM3Grounding",
+      "pos": [
+        390,
+        280
+      ],
+      "size": [
+        300,
+        210
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "sam3_model",
+          "type": "SAM3_MODEL",
+          "link": 1
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 2
+        },
+        {
+          "name": "positive_boxes",
+          "shape": 7,
+          "type": "SAM3_BOXES_PROMPT",
+          "link": null
+        },
+        {
+          "name": "negative_boxes",
+          "shape": 7,
+          "type": "SAM3_BOXES_PROMPT",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "masks",
+          "type": "MASK",
+          "links": [
+            6
+          ]
+        },
+        {
+          "name": "visualization",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "boxes",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "scores",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-sam3",
+        "Node name for S&R": "SAM3Grounding"
+      },
+      "widgets_values": [
+        0.2,
+        "person",
+        2,
+        false
+      ]
+    },
+    {
+      "id": 4,
+      "type": "SAM3MasksToRedBlueImage",
+      "pos": [
+        1120,
+        280
+      ],
+      "size": [
+        350,
+        190
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "masks",
+          "type": "MASK",
+          "link": 6
+        },
+        {
+          "name": "anime_mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "RED_BLUE_IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7,
+            10
+          ]
+        },
+        {
+          "name": "RED_MASK",
+          "type": "MASK",
+          "links": [
+            8
+          ]
+        },
+        {
+          "name": "BLUE_MASK",
+          "type": "MASK",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "INFO",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ukr8b3g-cmyk/Anima_Regional_Canvas_Image_Input",
+        "Node name for S&R": "SAM3MasksToRedBlueImage"
+      },
+      "widgets_values": [
+        "auto",
+        0.5,
+        0.1
+      ]
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [
+        1120,
+        520
+      ],
+      "size": [
+        350,
+        280
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 6,
+      "type": "MaskPreview",
+      "pos": [
+        1490,
+        510
+      ],
+      "size": [
+        230,
+        250
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 8
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "MaskPreview"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 7,
+      "type": "MaskPreview",
+      "pos": [
+        1740,
+        510
+      ],
+      "size": [
+        230,
+        250
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "MaskPreview"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 8,
+      "type": "UNETLoader",
+      "pos": [
+        40,
+        -20
+      ],
+      "size": [
+        300,
+        90
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "Model",
+          "name": "unet_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "unet_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "ANIMA\\anima_baseV10.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        390,
+        -20
+      ],
+      "size": [
+        300,
+        90
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "anima\\anima-turbo-lora-v0.2.safetensors",
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "type": "CLIPLoader",
+      "pos": [
+        40,
+        100
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_06b_base.safetensors",
+        "stable_diffusion",
+        "default"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "AnimaRegionalCanvasImageInput",
+      "pos": [
+        2010,
+        -40
+      ],
+      "size": [
+        1430,
+        1270
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 12
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 13
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            14,
+            18
+          ]
+        },
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "POSITIVE",
+          "type": "CONDITIONING",
+          "links": [
+            20
+          ]
+        },
+        {
+          "name": "NEGATIVE",
+          "type": "CONDITIONING",
+          "links": [
+            21
+          ]
+        },
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            22
+          ]
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "MASK_PREVIEW",
+          "type": "IMAGE",
+          "links": [
+            15
+          ]
+        },
+        {
+          "name": "POSITIVE_TEXT",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "NEGATIVE_TEXT",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "ukr8b3g-cmyk/Anima_Regional_Canvas_Image_Input",
+        "Node name for S&R": "AnimaRegionalCanvasImageInput",
+        "animaPrompts": {
+          "quality_prompt": "masterpiece, absurdres, score_7, anime style",
+          "scene_prompt": "2girls",
+          "red_prompt": "left character",
+          "blue_prompt": "right character",
+          "yellow_prompt": "",
+          "green_prompt": "",
+          "magenta_prompt": "",
+          "negative_prompt": "worst quality, low quality, blurry, bad anatomy"
+        },
+        "arcCanvasSizeVersion": 1,
+        "arcSplitRatio": 0.68
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1,
+        92,
+        0.95,
+        "masterpiece, absurdres, score_7, anime style",
+        "2girls",
+        "left character",
+        "right character",
+        "",
+        "",
+        "",
+        "worst quality, low quality, blurry, bad anatomy",
+        "",
+        true,
+        false
+      ]
+    },
+    {
+      "id": 12,
+      "type": "PreviewImage",
+      "pos": [
+        3480,
+        180
+      ],
+      "size": [
+        330,
+        280
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 14
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 13,
+      "type": "PreviewImage",
+      "pos": [
+        3480,
+        520
+      ],
+      "size": [
+        330,
+        280
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 14,
+      "type": "Note",
+      "pos": [
+        760,
+        40
+      ],
+      "size": [
+        1170,
+        150
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "SAM3で2人を分離し、IS-Net Animeの全体前景MASKで髪・服などの欠けを補助します。補助MASKはSAM3の2人の中心境界で赤・青へ分け、SAM3で未割当の画素だけを合成します。生成はAnima LLLiteを適用したKSampler 1個です。SAM3が独立した人物MASKを2枚出せない画像は処理できません。"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "VAELoader",
+      "pos": [
+        390,
+        100
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "ModelPatchLoader",
+      "pos": [
+        1490,
+        20
+      ],
+      "size": [
+        340,
+        60
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL_PATCH",
+          "type": "MODEL_PATCH",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "ModelPatchLoader"
+      },
+      "widgets_values": [
+        "anima-lllite-regional-exp-v3.safetensors"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "AnimaLLLiteApply",
+      "pos": [
+        3480,
+        -20
+      ],
+      "size": [
+        340,
+        170
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 17
+        },
+        {
+          "name": "model_patch",
+          "type": "MODEL_PATCH",
+          "link": 16
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 18
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "AnimaLLLiteApply"
+      },
+      "widgets_values": [
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 18,
+      "type": "Image Rembg (Remove Background)",
+      "pos": [
+        390,
+        520
+      ],
+      "size": [
+        360,
+        270
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "was-node-suite-comfyui",
+        "Node name for S&R": "Image Rembg (Remove Background)"
+      },
+      "widgets_values": [
+        false,
+        "isnet-anime",
+        true,
+        true,
+        false,
+        240,
+        10,
+        10,
+        "none"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "ImageToMask",
+      "pos": [
+        790,
+        550
+      ],
+      "size": [
+        260,
+        80
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "ImageToMask"
+      },
+      "widgets_values": [
+        "red"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "KSampler",
+      "pos": [
+        3850,
+        -20
+      ],
+      "size": [
+        340,
+        490
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 19
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 20
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 21
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 22
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        123456789,
+        "randomize",
+        12,
+        1,
+        "er_sde",
+        "simple",
+        1
+      ]
+    },
+    {
+      "id": 21,
+      "type": "VAEDecode",
+      "pos": [
+        4220,
+        -20
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 23
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            25,
+            26
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 22,
+      "type": "PreviewImage",
+      "pos": [
+        4460,
+        -20
+      ],
+      "size": [
+        340,
+        310
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 25
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 23,
+      "type": "SaveAnimatedWEBP",
+      "pos": [
+        4460,
+        340
+      ],
+      "size": [
+        340,
+        220
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "SaveAnimatedWEBP"
+      },
+      "widgets_values": [
+        "Anima_Regional_SAM3",
+        1,
+        false,
+        90,
+        "default"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "SAM3_MODEL"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      1,
+      "IMAGE"
+    ],
+    [
+      3,
+      1,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      18,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      19,
+      0,
+      4,
+      1,
+      "MASK"
+    ],
+    [
+      6,
+      3,
+      0,
+      4,
+      0,
+      "MASK"
+    ],
+    [
+      7,
+      4,
+      0,
+      5,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      4,
+      1,
+      6,
+      0,
+      "MASK"
+    ],
+    [
+      9,
+      4,
+      2,
+      7,
+      0,
+      "MASK"
+    ],
+    [
+      10,
+      4,
+      0,
+      11,
+      2,
+      "IMAGE"
+    ],
+    [
+      11,
+      8,
+      0,
+      9,
+      0,
+      "MODEL"
+    ],
+    [
+      12,
+      9,
+      0,
+      11,
+      0,
+      "MODEL"
+    ],
+    [
+      13,
+      10,
+      0,
+      11,
+      1,
+      "CLIP"
+    ],
+    [
+      14,
+      11,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      15,
+      11,
+      6,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      16,
+      16,
+      0,
+      17,
+      1,
+      "MODEL_PATCH"
+    ],
+    [
+      17,
+      11,
+      1,
+      17,
+      0,
+      "MODEL"
+    ],
+    [
+      18,
+      11,
+      0,
+      17,
+      2,
+      "IMAGE"
+    ],
+    [
+      19,
+      17,
+      0,
+      20,
+      0,
+      "MODEL"
+    ],
+    [
+      20,
+      11,
+      2,
+      20,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      21,
+      11,
+      3,
+      20,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      22,
+      11,
+      4,
+      20,
+      3,
+      "LATENT"
+    ],
+    [
+      23,
+      20,
+      0,
+      21,
+      0,
+      "LATENT"
+    ],
+    [
+      24,
+      15,
+      0,
+      21,
+      1,
+      "VAE"
+    ],
+    [
+      25,
+      21,
+      0,
+      22,
+      0,
+      "IMAGE"
+    ],
+    [
+      26,
+      21,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1. SAM3で2人を検出",
+      "bounding": [
+        20,
+        190,
+        700,
+        530
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2. IS-Net Animeで輪郭補助し赤青MASKへ統合",
+      "bounding": [
+        360,
+        240,
+        1640,
+        590
+      ],
+      "color": "#8e6d3a",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3. 赤青IMAGEをCanvasへ入力",
+      "bounding": [
+        1980,
+        -90,
+        1880,
+        1330
+      ],
+      "color": "#4f7b45",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "4. Anima LLLite + KSampler 1個で生成",
+      "bounding": [
+        3450,
+        -90,
+        1390,
+        900
+      ],
+      "color": "#6d4f8e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.55,
+      "offset": [
+        40,
+        100
+      ]
+    },
+    "frontendVersion": "1.32.9",
+    "workflowRendererVersion": "LG"
+  },
+  "version": 0.4
+}

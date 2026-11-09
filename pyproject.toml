@@ -1,0 +1,11 @@
+[project]
+name = "anima-regional-canvas-image-input"
+description = "A copy of Anima Regional Canvas that accepts a red/blue regional IMAGE input."
+version = "1.0.0"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.comfy]
+PublisherId = "local"
+DisplayName = "Anima Regional Canvas Image Input"
