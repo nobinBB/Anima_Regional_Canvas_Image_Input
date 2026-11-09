@@ -121,19 +121,6 @@ def _latent_size(width, height):
     return width, height
 
 
-def _resize_image_tensor(image, width, height):
-    width, height = _latent_size(width, height)
-    src = image[:, :, :, :3].float()
-    if src.shape[1:3] == (height, width):
-        return src
-    return torch.nn.functional.interpolate(
-        src.movedim(-1, 1),
-        size=(height, width),
-        mode="bilinear",
-        align_corners=False,
-    ).movedim(1, -1)
-
-
 def _regional_image_input(image, batch_size):
     if image is None or image.ndim != 4 or image.shape[-1] < 3:
         raise ValueError("image must be a ComfyUI IMAGE tensor in BHWC format.")
@@ -149,42 +136,6 @@ def _regional_image_input(image, batch_size):
     if batch_size > 1:
         source = source.repeat(batch_size, 1, 1, 1)
     return source, width, height
-
-
-def _grow_mask(mask, amount):
-    mask = mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1]))
-    amount = max(0, int(amount))
-    if amount <= 0:
-        return mask.round()
-    mask = mask.round()
-    kernel_size = amount * 2 + 1
-    return torch.nn.functional.max_pool2d(mask, kernel_size, stride=1, padding=amount)
-
-
-def _inpaint_latent(vae, pixels, mask, grow_mask_by):
-    downscale_ratio = vae.spacial_compression_encode() if hasattr(vae, "spacial_compression_encode") else 8
-    height = (pixels.shape[1] // downscale_ratio) * downscale_ratio
-    width = (pixels.shape[2] // downscale_ratio) * downscale_ratio
-    mask = torch.nn.functional.interpolate(
-        mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])),
-        size=(pixels.shape[1], pixels.shape[2]),
-        mode="bilinear",
-    )
-    pixels = pixels.clone()
-    if pixels.shape[1] != height or pixels.shape[2] != width:
-        y_offset = (pixels.shape[1] % downscale_ratio) // 2
-        x_offset = (pixels.shape[2] % downscale_ratio) // 2
-        pixels = pixels[:, y_offset:height + y_offset, x_offset:width + x_offset, :]
-        mask = mask[:, :, y_offset:height + y_offset, x_offset:width + x_offset]
-
-    noise_mask = _grow_mask(mask, grow_mask_by)[:, :, :height, :width].round()
-    keep = (1.0 - mask.round()).squeeze(1)
-    for channel in range(3):
-        pixels[:, :, :, channel] -= 0.5
-        pixels[:, :, :, channel] *= keep
-        pixels[:, :, :, channel] += 0.5
-
-    return {"samples": vae.encode(pixels), "noise_mask": noise_mask}
 
 
 def _image_from_canvas(canvas_data, width, height, batch_size):
@@ -602,70 +553,6 @@ class AnimeInstanceMasksToRedBlueImage(SAM3MasksToRedBlueImage):
     """Compatibility alias with a source-agnostic name for anime instance masks."""
 
     pass
-
-class AnimaRegionalInpaintCanvas:
-    @classmethod
-    def INPUT_TYPES(cls):
-        required = {
-            "model": ("MODEL",),
-            "clip": ("CLIP",),
-            "width": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 8}),
-            "height": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 8}),
-            "batch_size": ("INT", {"default": 1, "min": 1, "max": 4096}),
-            "brush_size": ("INT", {"default": 92, "min": 1, "max": 512, "step": 1}),
-            "region_strength": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 10.0, "step": 0.01}),
-            "quality_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["quality_prompt"]),
-            "scene_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["scene_prompt"]),
-            "red_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["red_prompt"]),
-            "blue_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["blue_prompt"]),
-            "yellow_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["yellow_prompt"]),
-            "green_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["green_prompt"]),
-            "magenta_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["magenta_prompt"]),
-            "negative_prompt": _text_input(STANDARD_PROMPT_DEFAULTS["negative_prompt"]),
-            "canvas_data": _canvas_input(),
-            "regional_enabled": ("BOOLEAN", {"default": True}),
-            "grow_mask_by": ("INT", {"default": 6, "min": 0, "max": 64, "step": 1}),
-        }
-        optional = {
-            "vae": ("VAE",),
-            "quality_prompt_in": ("STRING", {"forceInput": True}),
-            "scene_prompt_in": ("STRING", {"forceInput": True}),
-            "red_prompt_in": ("STRING", {"forceInput": True}),
-            "blue_prompt_in": ("STRING", {"forceInput": True}),
-            "yellow_prompt_in": ("STRING", {"forceInput": True}),
-            "green_prompt_in": ("STRING", {"forceInput": True}),
-            "magenta_prompt_in": ("STRING", {"forceInput": True}),
-            "negative_prompt_in": ("STRING", {"forceInput": True}),
-            "image": ("IMAGE",),
-        }
-        return {"required": required, "optional": optional}
-
-    RETURN_TYPES = ("IMAGE", "MODEL", "CONDITIONING", "CONDITIONING", "LATENT", "MASK", "STRING")
-    RETURN_NAMES = ("IMAGE", "MODEL", "POSITIVE", "NEGATIVE", "INPAINT_LATENT", "INPAINT_MASK", "METADATA")
-    FUNCTION = "execute"
-    CATEGORY = "Anima/Regional"
-
-    def execute(self, model, clip, width, height, batch_size, brush_size, region_strength, grow_mask_by, canvas_data="", **kwargs):
-        width, height = _latent_size(width, height)
-        batch_size = max(1, int(batch_size))
-        mask_image = _image_from_canvas(canvas_data, width, height, batch_size)
-        masks = _extract_masks(mask_image)
-        prompts = _prompts(kwargs)
-        regional_enabled = kwargs.get("regional_enabled", True)
-        positive, negative = _conditioning(clip, prompts, masks, region_strength, regional_enabled)
-        inpaint_mask = torch.clamp(1.0 - masks["base"], 0.0, 1.0)
-        inpaint_mask = inpaint_mask.unsqueeze(0).repeat(batch_size, 1, 1)
-        source_image = kwargs.get("image")
-        vae = kwargs.get("vae")
-        if source_image is not None and vae is not None:
-            pixels = _resize_image_tensor(source_image, width, height)
-            if pixels.shape[0] != batch_size:
-                pixels = pixels[:1].repeat(batch_size, 1, 1, 1)
-            latent = _inpaint_latent(vae, pixels, inpaint_mask, grow_mask_by)
-        else:
-            latent = _latent(width, height, batch_size)
-        metadata = _metadata(prompts, width, height, "inpaint", regional_enabled, region_strength)
-        return (mask_image, model, positive, negative, latent, inpaint_mask, metadata)
 
 NODE_CLASS_MAPPINGS = {
     "AnimaRegionalCanvasImageInput": AnimaRegionalCanvasImageInput,
